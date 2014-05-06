@@ -1,0 +1,22 @@
+Originally, this program was 'ccache-2.4' from:
+
+  Andrew Tridgell
+  http://samba.org/~tridge/
+  bugs@ccache.samba.org
+
+I have modified (and also renamed it to f90cache) it to support Fortran 90.
+
+The first version number I chosen was 0.9 because it is usable.
+It is perhaps not yet very stable. More tests must be done.
+
+See also the modifications in the file CHANGES.
+
+Caveats: ccache supports only C/C++ and so, f90cache supports only Fortran 90.
+
+Édouard Canot -- CNRS
+http://people.irisa.fr/Edouard.Canot
+Edouard.Canot@irisa.fr
+
+Oct. 2009
+
+------------------------------------------------------------------------

@@ -1,0 +1,318 @@
+.TH "f90cache" "1" "Aug 2013" "" ""
+
+.SH "NAME"
+f90cache \- a Fortran 90 compiler cache
+
+.SH "VERSION"
+0.95 \- Aug\&. 2013
+
+.SH "SYNOPSIS"
+f90cache [OPTION]
+.PP
+f90cache <compiler> [COMPILER OPTIONS]
+
+.SH "DESCRIPTION"
+f90cache is a compiler cache\&. It speeds up re-compilation of Fortran code
+by caching previous compiles and detecting when the same compile is
+being done again\&.
+
+.SH "OPTIONS SUMMARY"
+Here is a summary of the options to f90cache\&.
+.PP
+
+.nf
+-s                show statistics summary
+-z                zero statistics
+-c                run a cache cleanup
+-C                clear the cache completely
+-F <maxfiles>     set maximum files in cache
+-M <maxsize>      set maximum size of cache (use G, M or K)
+-h                this help page
+-V                print version number
+.fi
+
+.SH "OPTIONS"
+These options only apply when you invoke f90cache as "f90cache"\&. When
+invoked as a compiler none of these options apply\&. In that case your
+normal compiler options apply and you should refer to your compilers
+documentation\&.
+.PP
+.IP "\fB-h\fP"
+Print a options summary page
+.IP
+.IP "\fB-s\fP"
+Print the current statistics summary for the cache\&. The
+statistics are stored spread across the subdirectories of the
+cache\&. Using "f90cache -s" adds up the statistics across all
+subdirectories and prints the totals\&.
+.IP
+.IP "\fB-z\fP"
+Zero the cache statistics\&.
+.IP
+.IP "\fB-V\fP"
+Print the f90cache version number
+.IP
+.IP "\fB-c\fP"
+Clean the cache and re-calculate the cache file count and
+size totals\&. Normally the -c option should not be necessary as f90cache
+keeps the cache below the specified limits at runtime and keeps
+statistics up to date on each compile\&. This option is mostly useful
+if you manually modify the cache contents or believe that the cache
+size statistics may be inaccurate\&.
+.IP
+.IP "\fB-C\fP"
+Clear the entire cache, removing all cached files\&.
+.IP
+.IP "\fB-F maxfiles\fP"
+This sets the maximum number of files allowed in
+the cache\&. The value is stored inside the cache directory and applies
+to all future compiles\&. Due to the way the value is stored the actual
+value used is always rounded down to the nearest multiple of 16\&.
+.IP
+.IP "\fB-M maxsize\fP"
+This sets the maximum cache size\&. You can specify
+a value in gigabytes, megabytes or kilobytes by appending a G, M or K
+to the value\&. The default is gigabytes\&. The actual value stored is
+rounded down to the nearest multiple of 16 kilobytes\&.
+.IP
+
+.SH "INSTALLATION"
+There are two ways to use f90cache\&. You can either prefix your compile
+commands with "f90cache" or you can create a symbolic link between
+f90cache and the names of your compilers\&. The first method is most
+convenient if you just want to try out f90cache or wish to use it for
+some specific projects\&. The second method is most useful for when you
+wish to use f90cache for all your compiles\&.
+.PP
+To install for usage by the first method just copy f90cache to somewhere
+in your path\&.
+.PP
+To install for the second method do something like this:
+
+.nf
+  cp f90cache /usr/local/bin/
+  ln -s /usr/local/bin/f90cache /usr/local/bin/gfortran
+.fi
+
+This will work as long as /usr/local/bin comes before the path to gfortran\&.
+After installing you may wish to run
+"which gfortran" to make sure that the correct link is being used\&.
+.PP
+Note! Do not use a hard link, use a symbolic link\&.
+
+.SH "EXTRA OPTIONS"
+When run as a compiler front end "f90cache" usually just takes the same
+command line options as the compiler you are using\&. The exceptions to this
+rule are: \&(i\&) the option \&'--f90cache-skip\&'\&; that option can be used
+to tell f90cache that the next option is definitely not an input filename, and
+should be passed along to the compiler as-is\&. \&(ii\&) the option
+\&'--f90cache-depmod\&'\&; that option takes one argument which must be
+a precompiled Fortran module file which will be considered as a dependence
+for the current source file\&.
+.PP
+Concerning the exception (i), the reason why this can be important is that
+f90cache does need to parse the command line and determine what is an input
+filename and what is a compiler option, as it needs the input filename to
+determine the name of the resulting object file (among other things)\&.
+The heuristic f90cache uses in this parsing is that any string on the command
+line that exists as a file is treated as an input file name (usually a
+Fortran file)\&. By using \&'--f90cache-skip\&' you can force an option to not be
+treated as an input file name and instead be passed along to the compiler
+as a command line option\&.
+
+.SH "ENVIRONMENT VARIABLES"
+f90cache uses a number of environment variables to control operations\&. In
+most cases you won\&'t need any of these as the defaults will be fine\&.
+.PP
+.IP
+.IP "\fBF90CACHE_DIR\fP"
+the F90CACHE_DIR environment variable specifies
+where f90cache will keep its cached compiler output\&. The default is
+"$HOME/\&.f90cache"\&.
+.IP
+.IP "\fBF90CACHE_TEMPDIR\fP"
+the F90CACHE_TEMPDIR environment variable specifies
+where f90cache will put temporary files\&. The default is the same as
+F90CACHE_DIR\&. Note that the F90CACHE_TEMPDIR path must be on the same
+filesystem as the F90CACHE_DIR path, so that renames of files between
+the two directories can work\&.
+.IP
+.IP "\fBF90CACHE_LOGFILE\fP"
+If you set the F90CACHE_LOGFILE environment
+variable then f90cache will write some log information on cache hits
+and misses in that file\&. This is useful for tracking down problems\&.
+.IP
+.IP "\fBF90CACHE_PATH\fP"
+You can optionally set F90CACHE_PATH to a colon
+separated path where f90cache will look for the real compilers\&. If you
+don\&'t do this then f90cache will look for the first executable matching
+the compiler name in the normal PATH that isn\&'t a symbolic link to
+f90cache itself\&.
+.IP
+.IP "\fBF90CACHE_FC\fP"
+You can optionally set F90CACHE_FC to force the name
+of the compiler to use\&. If you don\&'t do this then f90cache works it out
+from the command line\&.
+.IP
+.IP "\fBF90CACHE_PREFIX\fP"
+This option adds a prefix to the command line
+that f90cache runs when invoking the compiler\&.
+.IP
+.IP "\fBF90CACHE_DISABLE\fP"
+If you set the environment variable
+F90CACHE_DISABLE then f90cache will just call the real compiler,
+bypassing the cache completely\&.
+.IP
+.IP "\fBF90CACHE_READONLY\fP"
+the F90CACHE_READONLY environment variable
+tells f90cache to attempt to use existing cached object files, but not
+to try to add anything new to the cache\&. If you are using this because
+your F90CACHE_DIR is read-only, then you may find that you also need to
+set F90CACHE_TEMPDIR as otherwise f90cache will fail to create the
+temporary files\&.
+.IP
+.IP "\fBF90CACHE_FPP2\fP"
+If you set the environment variable F90CACHE_FPP2
+then f90cache will not use the optimisation of avoiding the 2nd call to
+the pre-processor by compiling the pre-processed output that was used
+for finding the hash in the case of a cache miss\&. This is primarily a
+debugging option, although it is possible that some unusual compilers
+will have problems with the intermediate filename extensions used in
+this optimisation, in which case this option could allow f90cache to be
+used\&.
+.IP
+.IP "\fBF90CACHE_NOSTATS\fP"
+If you set the environment variable
+F90CACHE_NOSTATS then f90cache will not update the statistics files on
+each compile\&.
+.IP
+.IP "\fBF90CACHE_NLEVELS\fP"
+The environment variable F90CACHE_NLEVELS allows
+you to choose the number of levels of hash in the cache directory\&. The
+default is 2\&. The minimum is 1 and the maximum is 8\&.
+.IP
+.IP "\fBF90CACHE_HARDLINK\fP"
+If you set the environment variable
+F90CACHE_HARDLINK then f90cache will attempt to use hard links from the
+cache directory when creating the compiler output rather than using a
+file copy\&. Using hard links is faster, but can confuse programs like
+\&'make\&' that rely on modification times\&.
+.IP
+.IP "\fBF90CACHE_RECACHE\fP"
+This forces f90cache to not use any cached
+results, even if it finds them\&. New results are still cached, but
+existing cache entries are ignored\&.
+.IP
+.IP "\fBF90CACHE_UMASK\fP"
+This sets the umask for f90cache and all child
+processes (such as the compiler)\&. This is mostly useful when you wish
+to share your cache with other users\&. Note that this also affects the
+file permissions set on the object files created from your
+compilations\&.
+.IP
+.IP "\fBF90CACHE_HASHDIR\fP"
+This tells f90cache to hash the current working
+directory when calculating the hash that is used to distinguish two
+compiles\&. This prevents a problem with the storage of the current
+working directory in the debug info of a object file, which can lead
+f90cache to give a cached object file that has the working directory in
+the debug info set incorrectly\&. This option is off by default as the
+incorrect setting of this debug info rarely causes problems\&. If you
+strike problems with gdb not using the correct directory then enable
+this option\&.
+.IP
+
+.SH "CACHE SIZE MANAGEMENT"
+By default f90cache has a one gigabyte limit on the cache size and no
+maximum number of files\&. You can set a different limit using the
+"f90cache -M" and "f90cache -F" options, which set the size and number of
+files limits\&.
+.PP
+When these limits are reached f90cache will reduce the cache to 20%
+below the numbers you specified in order to avoid doing the cache
+clean operation too often\&.
+
+.SH "HOW IT WORKS"
+The basic idea is to detect when you are compiling exactly the same
+code a 2nd time and use the previously compiled output\&. We detect
+that it is the same code by forming a hash of:
+.PP
+.IP o
+the source file given or (if applicable) the pre-processor output from
+running the compiler with -E;
+.IP o
+some precompiled Fortran module files, whom the current source
+file depends on (each module file must be given as an argument
+of the '--f90cache-depmod' option);
+.IP o
+the command line options;
+.IP o
+the real compilers size and modification time\&.
+.PP
+These are hashed using md4 (a strong hash) and a cache file is formed
+based on that hash result\&. When the same compilation is done a second
+time f90cache is able to supply the correct compiler output (including
+all warnings etc) from the cache\&.
+.PP
+Three kind of information are kept inside the cache:
+.IP o
+the object binary file;
+.IP o
+the precompiled module file (if any);
+.IP o
+the stderr output generated by the compiler\&.
+.PP
+f90cache has been carefully written to always produce exactly the same
+compiler output that you would get without the cache\&. If you ever
+discover a case where f90cache changes the output of your compiler then
+please let me know\&.
+
+.SH "SHARING A CACHE"
+A group of developers can increase the cache hit rate by sharing a
+cache directory\&.  The hard links however cause unwanted side effects,
+as all links to a cached file share the file\&'s modification timestamp\&.
+This results in false dependencies to be triggered by timestamp-based
+build systems whenever another user links to an existing
+file\&. Typically, users will see that their libraries and binaries are
+relinked without reason\&.  To share a cache without side effects, the
+following conditions need to be met:
+.PP
+.IP o
+Use the same \fBF90CACHE_DIR\fP environment variable setting
+.IP o
+Set the \fBF90CACHE_NOLINK\fP environment variable
+.IP o
+Make sure everyone sets the \fBF90CACHE_UMASK\fP environment variable
+to 002, this ensures that cached files are accessible to everyone in
+the group\&.
+.IP o
+Make sure that all users have write permission in the entire
+cache directory (and that you trust all users of the shared cache)\&.
+.IP o
+Make sure that the setgid bit is set on all directories in the
+cache\&. This tells the filesystem to inherit group ownership for new
+directories\&. The command "chmod g+s `find $F90CACHE_DIR -type d`" might
+be useful for this\&.
+
+.SH "HISTORY"
+f90cache comes from ccache written by Andrew Tridgell\&. See the man page of
+ccache for more information\&.
+.PP
+
+.SH "BUGS OR LIMITATIONS"
+The full path of the working directory must not contain any blank character\&.
+
+For GNU-GCC gfortran compilers, the actual name of the compiler must be
+gfortran-4.x (e.g. \fBgfortran-4.3\fP, \fBgfortran-4.4\fP, ...). You may
+create symbolic links to fulfill this requirement.
+
+For Solaris-studio f95 compilers, the actual name of the compiler must be
+\fBsunf95\fP. You may create symbolic links to fulfill this requirement.
+
+.SH "AUTHOR"
+f90cache has been adapted from ccache by Édouard Canot (from 2009):
+http://people\&.irisa\&.fr/Edouard\&.Canot
+.PP
+If you wish to report a problem or make a suggestion then please email
+Edouard.Canot@irisa\&.fr
+

@@ -1,0 +1,37 @@
+srcdir=@srcdir@
+VPATH=@srcdir@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+mandir=@mandir@
+INSTALLCMD=@INSTALL@
+
+CC=@CC@
+CFLAGS=@CFLAGS@ -I.
+EXEEXT=@EXEEXT@
+
+OBJS= f90cache.o mdfour.o hash.o execute.o util.o args.o stats.o \
+	cleanup.o snprintf.o
+
+HEADERS = f90cache.h mdfour.h
+
+all: f90cache$(EXEEXT)
+
+f90cache$(EXEEXT): $(OBJS) $(HEADERS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
+
+install: f90cache$(EXEEXT) f90cache.1
+	${INSTALLCMD} -d $(DESTDIR)${bindir}
+	${INSTALLCMD} -m 755 f90cache$(EXEEXT) $(DESTDIR)${bindir}
+	${INSTALLCMD} -d $(DESTDIR)${mandir}/man1
+	${INSTALLCMD} -m 644 ${srcdir}/f90cache.1 $(DESTDIR)${mandir}/man1/
+	strip $(DESTDIR)${bindir}/f90cache$(EXEEXT)
+
+clean:
+	/bin/rm -f $(OBJS) *~ f90cache$(EXEEXT)
+
+distclean: clean
+	/bin/rm -f Makefile config.h config.sub config.log build-stamp \
+        config.status tags
+

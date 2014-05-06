@@ -1,0 +1,11 @@
+ 
+INSTALLATION
+------------
+
+Please run:
+
+  ./configure
+  make
+  make install
+
+then read the f90cache manual page

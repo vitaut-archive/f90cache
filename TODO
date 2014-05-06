@@ -1,0 +1,37 @@
+- introduire la licence (GPL)
+
+- revoir les problèmes où, certaines fois, le compilo (INTEL ?) plante
+  quand on utilise f90cache.
+  Au pire, s'il y a collision, un mauvais binaire (.o) est chargé et
+  cela devrait au mieux introduire une faute lors de l'édition de liens
+  (de type 'undefined reference'), au pire une seg. fault au run-time
+  (ce dernier point est quelque peu embêtant...)
+
+__________________________
+
+- for GNU-gfortran, the only way to call 'f90cache' is to rename the
+  compiler executable (or via a soft link) to 'gfortran-4.x'
+
+- has introduced the detection of the compiler family : but the version
+  detection should be done also (e.g. 4.3, 4.4 or 4.5 for gfortran).
+
+  For example, the new routine 'hash_module_file' in 'hash.c' supports
+  both GNU-gfortran 4.1 and 4.3 or 4.4, but the 4.1 part has been
+  commented out.
+
+- in 'f90cache.c' at line 536 (cf. '### TODO'), replace the hard path
+  "/usr/bin/cpp", by the correct path via a more intelligent way.
+__________________________
+
+- f90cache doesn't support the f90 'include' statement: use a
+  preprocessing instruction ('#include') instead.
+
+  (to be added in the man page ?)
+
+- increase performance: for copying module file from cache to current
+  directory, use 'copy_file()' (as at line 800 or 815) instead of
+  using a 'system()' command ... (cf. line 762, 770).
+
+  Mais, pas systématique, car il peut y avoir plusieurs 'module' (*.mod) pour
+  un seul fichier source; auquel cas copy_file() ne convient pas.
+

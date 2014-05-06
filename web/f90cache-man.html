@@ -1,0 +1,283 @@
+<html>
+<head>
+<title>f90cache</title>
+</head>
+
+<body>
+
+<hr>
+
+<h1>f90cache</h1>
+
+<h2>NAME</h2>
+    f90cache - a Fortran 90 compiler cache
+
+<h2>VERSION</h2>
+    0.95 - Aug. 2013
+
+<h2>SYNOPSIS</h2>
+
+<p>f90cache [OPTION]
+<p>f90cache &lt;compiler&gt; [COMPILER OPTIONS]
+<p>&lt;compiler&gt; [COMPILER OPTIONS]
+
+<h2>DESCRIPTION</h2>
+
+<p>f90cache is a compiler cache. It speeds up re-compilation of Fortran code
+by caching previous compiles and detecting when the same compile is
+being done again.
+
+<h2>OPTIONS SUMMARY</h2>
+
+<p>Here is a summary of the options to f90cache.
+<p><pre>
+
+-s                      show statistics summary
+-z                      zero statistics
+-c                      run a cache cleanup
+-C                      clear the cache completely
+-F &lt;maxfiles&gt;           set maximum files in cache
+-M &lt;maxsize&gt;            set maximum size of cache (use G, M or K)
+-h                      this help page
+-V                      print version number
+
+</pre>
+
+<h2>OPTIONS</h2>
+
+<p>These options only apply when you invoke f90cache as "f90cache". When
+invoked as a compiler none of these options apply. In that case your
+normal compiler options apply and you should refer to your compilers
+documentation.
+<p><dl>
+<p></p><dt><strong><strong>-h</strong></strong><dd> Print a options summary page
+<p><p></p><dt><strong><strong>-s</strong></strong><dd> Print the current statistics summary for the cache. The
+statistics are stored spread across the subdirectories of the
+cache. Using "f90cache -s" adds up the statistics across all
+subdirectories and prints the totals.
+<p><p></p><dt><strong><strong>-z</strong></strong><dd> Zero the cache statistics.
+<p><p></p><dt><strong><strong>-V</strong></strong><dd> Print the f90cache version number
+<p><p></p><dt><strong><strong>-c</strong></strong><dd> Clean the cache and re-calculate the cache file count and
+size totals. Normally the -c option should not be necessary as f90cache
+keeps the cache below the specified limits at runtime and keeps
+statistics up to date on each compile. This option is mostly useful
+if you manually modify the cache contents or believe that the cache
+size statistics may be inaccurate.
+<p><p></p><dt><strong><strong>-C</strong></strong><dd> Clear the entire cache, removing all cached files.
+<p><p></p><dt><strong><strong>-F maxfiles</strong></strong><dd> This sets the maximum number of files allowed in
+the cache. The value is stored inside the cache directory and applies
+to all future compiles. Due to the way the value is stored the actual
+value used is always rounded down to the nearest multiple of 16.
+<p><p></p><dt><strong><strong>-M maxsize</strong></strong><dd> This sets the maximum cache size. You can specify
+a value in gigabytes, megabytes or kilobytes by appending a G, M or K
+to the value. The default is gigabytes. The actual value stored is
+rounded down to the nearest multiple of 16 kilobytes.
+<p></dl>
+
+<h2>INSTALLATION</h2>
+
+<p>There are two ways to use f90cache. You can either prefix your compile
+commands with "f90cache" or you can create a symbolic link between
+f90cache and the names of your compilers. The first method is most
+convenient if you just want to try out f90cache or wish to use it for
+some specific projects. The second method is most useful for when you
+wish to use f90cache for all your compiles.
+<p>To install for usage by the first method just copy f90cache to somewhere
+in your path.
+<p>To install for the second method do something like this:
+<pre>
+
+  cp f90cache /usr/local/bin/
+  ln -s /usr/local/bin/f90cache /usr/local/bin/gfortran
+
+</pre>
+
+This will work as long as /usr/local/bin comes before the path to gfortran.
+After installing you may wish to run
+"which gfortran" to make sure that the correct link is being used.
+<p>Note! Do not use a hard link, use a symbolic link.
+
+<h2>EXTRA OPTIONS</h2>
+
+<p>When run as a compiler front end f90cache usually just takes the same
+command line options as the compiler you are using. The exceptions to this
+rule are: (i) the option '--f90cache-skip'; that option can be used to tell
+f90cache that the next option is definitely not an input filename, and
+should be passed along to the compiler as-is. (ii) the option
+'--f90cache-depmod'; that option takes one argument which must be
+a precompiled Fortran module file which will be considered as a dependence
+for the current source file.
+<p>Concerning the exception (i), the reason why this can be important is that
+f90cache does need to parse the command line and determine what is an input
+filename and what is a compiler option, as it needs the input filename to
+determine the name of the resulting object file (among other things).
+The heuristic f90cache uses in this parsing is that any string on the command
+line that exists as a file is treated as an input file name (usually a Fortran
+file). By using --f90cache-skip you can force an option to not be
+treated as an input file name and instead be passed along to the
+compiler as a command line option.
+
+<h2>ENVIRONMENT VARIABLES</h2>
+
+<p>f90cache uses a number of environment variables to control operations. In
+most cases you won't need any of these as the defaults will be fine.
+<p><dl>
+<p><p></p><dt><strong><strong>F90CACHE_DIR</strong></strong><dd> the F90CACHE_DIR environment variable specifies
+where f90cache will keep its cached compiler output. The default is
+"$HOME/.f90cache".
+<p><p></p><dt><strong><strong>F90CACHE_TEMPDIR</strong></strong><dd> the F90CACHE_TEMPDIR environment variable specifies
+where f90cache will put temporary files. The default is the same as
+F90CACHE_DIR. Note that the F90CACHE_TEMPDIR path must be on the same
+filesystem as the F90CACHE_DIR path, so that renames of files between
+the two directories can work.
+<p><p></p><dt><strong><strong>F90CACHE_LOGFILE</strong></strong><dd> If you set the F90CACHE_LOGFILE environment
+variable then f90cache will write some log information on cache hits
+and misses in that file. This is useful for tracking down problems.
+<p><p></p><dt><strong><strong>F90CACHE_PATH</strong></strong><dd> You can optionally set F90CACHE_PATH to a colon
+separated path where f90cache will look for the real compilers. If you
+don't do this then f90cache will look for the first executable matching
+the compiler name in the normal PATH that isn't a symbolic link to
+f90cache itself.
+<p><p></p><dt><strong><strong>F90CACHE_FC</strong></strong><dd> You can optionally set F90CACHE_FC to force the name
+of the compiler to use. If you don't do this then f90cache works it out
+from the command line.
+<p><p></p><dt><strong><strong>F90CACHE_PREFIX</strong></strong><dd> This option adds a prefix to the command line
+that f90cache runs when invoking the compiler. Also see the section
+below on using f90cache with distcc.
+<p><p></p><dt><strong><strong>F90CACHE_DISABLE</strong></strong><dd> If you set the environment variable
+F90CACHE_DISABLE then f90cache will just call the real compiler,
+bypassing the cache completely.
+<p><p></p><dt><strong><strong>F90CACHE_READONLY</strong></strong><dd> the F90CACHE_READONLY environment variable
+tells f90cache to attempt to use existing cached object files, but not
+to try to add anything new to the cache. If you are using this because
+your F90CACHE_DIR is read-only, then you may find that you also need to
+set F90CACHE_TEMPDIR as otherwise f90cache will fail to create the
+temporary files.
+<p><p></p><dt><strong><strong>F90CACHE_FPP2</strong></strong><dd> If you set the environment variable F90CACHE_FPP2
+then f90cache will not use the optimisation of avoiding the 2nd call to
+the pre-processor by compiling the pre-processed output that was used
+for finding the hash in the case of a cache miss. This is primarily a
+debugging option, although it is possible that some unusual compilers
+will have problems with the intermediate filename extensions used in
+this optimisation, in which case this option could allow f90cache to be
+used.
+<p><p></p><dt><strong><strong>F90CACHE_NOSTATS</strong></strong><dd> If you set the environment variable
+F90CACHE_NOSTATS then f90cache will not update the statistics files on
+each compile.
+<p><p></p><dt><strong><strong>F90CACHE_NLEVELS</strong></strong><dd> The environment variable F90CACHE_NLEVELS allows
+you to choose the number of levels of hash in the cache directory. The
+default is 2. The minimum is 1 and the maximum is 8.
+<p><p></p><dt><strong><strong>F90CACHE_HARDLINK</strong></strong><dd> If you set the environment variable
+F90CACHE_HARDLINK then f90cache will attempt to use hard links from the
+cache directory when creating the compiler output rather than using a
+file copy. Using hard links is faster, but can confuse programs like
+'make' that rely on modification times.
+<p><p></p><dt><strong><strong>F90CACHE_RECACHE</strong></strong><dd> This forces f90cache to not use any cached
+results, even if it finds them. New results are still cached, but
+existing cache entries are ignored.
+<p><p></p><dt><strong><strong>F90CACHE_UMASK</strong></strong><dd> This sets the umask for f90cache and all child
+processes (such as the compiler). This is mostly useful when you wish
+to share your cache with other users. Note that this also affects the
+file permissions set on the object files created from your
+compilations.
+<p><p></p><dt><strong><strong>F90CACHE_HASHDIR</strong></strong><dd> This tells f90cache to hash the current working
+directory when calculating the hash that is used to distinguish two
+compiles. This prevents a problem with the storage of the current
+working directory in the debug info of a object file, which can lead
+f90cache to give a cached object file that has the working directory in
+the debug info set incorrectly. This option is off by default as the
+incorrect setting of this debug info rarely causes problems. If you
+strike problems with gdb not using the correct directory then enable
+this option.
+<p></dl>
+
+<h2>CACHE SIZE MANAGEMENT</h2>
+
+<p>By default f90cache has a one gigabyte limit on the cache size and no
+maximum number of files. You can set a different limit using the
+"f90cache -M" and "f90cache -F" options, which set the size and number of
+files limits.
+<p>When these limits are reached f90cache will reduce the cache to 20%
+below the numbers you specified in order to avoid doing the cache
+clean operation too often.
+
+<h2>HOW IT WORKS</h2>
+
+<p>The basic idea is to detect when you are compiling exactly the same
+code a 2nd time and use the previously compiled output. You detect
+that it is the same code by forming a hash of:
+<p><ul>
+  <li > the source file given or (if applicable) the pre-processor output from
+        running the compiler with -E;
+  <li > some precompiled Fortran module files, whom the current source
+        file depends on (each module file must be given as an argument
+        of the '--f90cache-depmod' option);
+  <li > the command line options;
+  <li > the real compilers size and modification time.
+</ul>
+<p>These are hashed using md4 (a strong hash) and a cache file is formed
+based on that hash result. When the same compilation is done a second
+time f90cache is able to supply the correct compiler output (including
+all warnings etc) from the cache.
+<p>Three kind of information are kept inside the cache:
+<p><ul>
+  <li > the object binary file;
+  <li > the precompiled module file (if any);
+  <li > the stderr output generated by the compiler.
+</ul>
+<p>f90cache has been carefully written to always produce exactly the same
+compiler output that you would get without the cache. If you ever
+discover a case where f90cache changes the output of your compiler then
+please let me know.
+
+<h2>SHARING A CACHE</h2>
+
+<p>A group of developers can increase the cache hit rate by sharing a
+cache directory.  The hard links however cause unwanted side effects,
+as all links to a cached file share the file's modification timestamp.
+This results in false dependencies to be triggered by timestamp-based
+build systems whenever another user links to an existing
+file. Typically, users will see that their libraries and binaries are
+relinked without reason.  To share a cache without side effects, the
+following conditions need to be met:
+<p><ul>
+  <li > Use the same <strong>F90CACHE_DIR</strong> environment variable setting
+  <li > Set the <strong>F90CACHE_NOLINK</strong> environment variable
+  <li > Make sure everyone sets the <strong>F90CACHE_UMASK</strong> environment
+        variable to 002, this ensures that cached files are accessible to
+        everyone in the group.
+  <li > Make sure that all users have write permission in the entire cache
+        directory (and that you trust all users of the shared cache).
+  <li > Make sure that the setgid bit is set on all directories in the cache.
+        This tells the filesystem to inherit group ownership for new
+        directories. The command "chmod g+s `find $F90CACHE_DIR -type d`" might
+        be useful for this.
+</ul>
+
+<h2>HISTORY</h2>
+
+<p>f90cache comes from ccache written by Andrew Tridgell. See the man page of
+ccache for more information.
+
+<h2>BUGS OR LIMITATIONS</h2>
+
+<p>The full path of the working directory must not contain any blank character.
+
+<p>For GNU-GCC gfortran compilers, the actual name of the compiler must be
+gfortran-4.x (e.g. <strong>gfortran-4.3</strong>, <strong>gfortran-4.4</strong>, ...).
+You may create symbolic links to fulfill this requirement.
+
+<p>For Solaris-studio f95 compilers, the actual name of the compiler must be
+<strong>sunf95</strong>.
+You may create symbolic links to fulfill this requirement.
+
+<h2>AUTHOR</h2>
+
+<p>f90cache has been adapted from ccache by Édouard Canot
+<a href="http://people.irisa.fr/Edouard.Canot/"><u>Édouard Canot web page</u></a>
+<p>If you wish to report a problem or make a suggestion then please email
+<A href="http://mailhide.recaptcha.net/d?k=014arWBAGa6tXhG2jeL8E8lA==&amp;c=KYRavimhwYXkvk6lSUr1tG1kTdx7UediKcAIRAf4SLc=" onclick="window.open('http://mailhide.recaptcha.net/d?k=014arWBAGa6tXhG2jeL8E8lA==&amp;c=KYRavimhwYXkvk6lSUr1tG1kTdx7UediKcAIRAf4SLc=', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Reveal this e-mail address"><u>Édouard Canot</u></A>
+<p>20 Aug. 2013
+
+</body>
+</html>

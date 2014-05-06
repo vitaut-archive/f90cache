@@ -1,0 +1,158 @@
+for f90cache-0.95:
+--------------------
+
+* previous version already works for some new compiler versions.
+  So, updated :
+    FSF_G95 : 0.91 to 0.94
+    INTEL_IFC : 9 to 13
+    OPEN64_F95 : 4.2 to 4.5
+    SUN_F95 : 8.5 or 8.6
+
+* IBM XLF support is removed
+
+* GNU_GFC:
+    tests have been added (f90cache_driver routine) to check that GNU
+    version is between 4.3 and 4.9
+
+    The 4.9 module file are gzipped (without MD5sum embedded); as a result
+    the whole compressed module files are added "as is" to the hash.
+
+for f90cache-0.94:
+--------------------
+
+* fix "hash_module_file": for GNU-gfortran the search for the "MD5:" tag
+  failed for some MOD files. Now, this tag is searched from the first
+  char. Via this fix, version 4.7 and 4.8 can be used.
+
+for f90cache-0.93:
+--------------------
+
+* fix new web address: http://people.irisa.fr/Edouard.Canot
+
+* GNU-gfortran now uses 'cpp' for preprocessing (instead of the compiler
+  name). This avoids the creation of an empty file with a ".s" extension
+  in the working directory.
+
+* IBM-xlf95 12 is now supported.
+
+* many few bugs fixed.
+
+* stats for module files is now better handled.
+
+  [upgraded version number to 0.93.1]
+
+* bug fixed in args.c: 'memmove' in 'args_strip' must concern
+  (args->argc - i) items, instead of (args->argc) items.
+
+  same fix has been done in 'args_strip_2'
+
+  [upgraded version number to 0.93.2]
+
+* bug fixed in f90cache.c: in 'from_cache', removed the line
+    free(output_obj);
+  because it is already freed, as an arg of 'orig_args'.
+  (this bug lead to an abort in glibc)
+
+  [upgraded version number to 0.93.3]
+
+* OPEN64-openf95 4.2 is now supported.
+
+  [upgraded version number to 0.93.4]
+
+* fix for IBM-xlf95: '-qnostrictieeemod' use leads to a warning.
+
+  [upgraded version number to 0.93.5]
+
+* adding 'break' after some 'for' loops about processing options
+  for preprocessing.
+
+* fix a bug at line 247 of f90cache.c: special case for OPEN64_F95
+  misses (as for INTEL_IFC), because module option '-module' needs
+  a blank after (two args instead of one only)
+
+* adding SOLARIS Studio 12 Fortran 95 (f95 8.5)
+
+  [upgraded version number to 0.93.6]
+
+* applied patch proposed by Elias Pipping
+  mail (Date: Fri, 10 Jun 2011 16:07:52 +0200):
+    '0001-Only-free-what-was-actually-allocated.patch'
+
+  [upgraded version number to 0.93.7]
+
+for f90cache-0.92:
+--------------------
+
+* for FSF-g95, '-pipe' doesn't contribute to the hash name, so it has
+  been removed in the 'find_hash' routine.
+
+* fix a bug in to_cache, when compilation failed, we forgot to test
+  mod_file_only before trying to check output_obj.
+
+* now, f90cache can put precompiled module files in location
+  specified by some compiler-dependant flags (as, e.g., '-fmod=' for
+  FSF-g95).
+
+* 'f90cache -C' now remove directories which end with '.dir'
+  (previously created to contain one precompiled module file)
+
+* fixed an error in 'wipe_all' (cleanup.c): 'traverse()' must be applied
+  to 'dname', not to 'dir' ! else, we do many times the same job !
+
+* fixed an error of ccache, in 'args_strip':
+  line: 'args->argc--;' was missplaced !
+
+* add another version of 'args_strip', named, 'args_strip_2', which
+  remove two args at a time. Fixed an error when using
+  '--f90cache-depmod' with a 'failed' status got in 'process_args'.
+
+
+for f90cache-0.91:
+--------------------
+
+* fixed a strange behavior with INTEL-ifort if we use the '-openmp'
+  during compilation, without specifying the destination file: an
+  object file named 'penmp' is created!
+  From now, a space is required for the '-o dest' option.
+  (fix made in f90cache.c)
+
+* added test for compiler detection
+
+========================================================================
+
+from ccache-2.4: creation of the directory f90cache-0.9 in order
+to support Fortran 90 (at least gfortran from GCC)
+
+* 'ccache' in all the filenames has been replaced with 'f90cache'
+
+* 'ccache' in all the files has been replaced with 'f90cache'
+
+* 'CCACHE' in all the files has been replaced with 'F90CACHE'
+
+* 'F90CACHE_CC' in all the files has been replaced with 'F90CACHE_FC'
+
+* f90cache.c modification
+
+    static struct extensions[]:
+      only the following extensions are valid: .F, .f, .F90, .f90
+
+    routine usage() has been updated
+
+    routine 'f90cache_main()' renamed 'f90cache_command()'
+
+    routine 'f90cache()' renamed 'f90cache_driver()'
+
+    suppression of routine 'setup_uncached_err()' [required for distcc]
+
+* in all files: 'cc_log()' renamed 'fc_log()'
+
+* routine 'unify()' is suppressed (it was for C/C++ only)
+
+* update of routine 'process_args()'
+
+    new list of possible options for gfortran in const char *opts[]
+
+* in routine 'find_hash()'
+
+    the basename is no longer limited to 10 characters
+
